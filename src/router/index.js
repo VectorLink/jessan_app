@@ -1,22 +1,60 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import Login from '../views/LoginView.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
+    // 登录
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: 'login',
+    component: Login
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    // 会员管理
+    path: '/vipUser',
+    name: 'vipUser',
+    component: () => import('@/views/VipUser.vue')
+  },{
+   // 发型师
+  path: "/hairMaster",
+    name: "hairMaster",
+    component: ()=>import('@/views/HairMaster')
+  }
+  ,{
+  // 添加会员
+    path: "/addVipUser",
+    name: "addVipUser",
+    component: ()=>import('@/views/AddVipUser')
+  }
+  ,{
+  // 个人信息
+    path: "/personInfo",
+    name: "personInfo",
+    component: ()=>import('@/views/PersonInfo')
+  },{
+  // 消费记录
+    path: "/history",
+    name: "history",
+    component: ()=>import('@/views/History')
+  },
+  {
+    // 非会员入账
+    path: "/inAccountBill",
+    name: "inAccountBill",
+    component: ()=>import('@/views/InAccountBill')
+  },
+  {
+    // 统计信息
+    path: "/statistic",
+    name: "statistic",
+    component: ()=>import('@/views/StoreStatistic')
+  },{
+     // 发型师账目
+   path: "/hairMasterBill",
+    name: "hairMasterBill",
+    component: ()=>import('@/views/Bill')
   }
 ]
 
