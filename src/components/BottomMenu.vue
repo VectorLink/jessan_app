@@ -1,5 +1,5 @@
 <template>
-  <van-tabbar v-model="active" active-color="#ee0a24" inactive-color="#000">
+  <van-tabbar v-model="active" active-color="#ee0a24" inactive-color="#000" :placeholder="true">
     <van-tabbar-item icon="friends-o" to="/vipUser">会员管理</van-tabbar-item>
     <van-tabbar-item icon="friends-o" to="/inAccountBill">非会员入账</van-tabbar-item>
     <van-tabbar-item icon="search" to="/hairMaster">发型师管理</van-tabbar-item>

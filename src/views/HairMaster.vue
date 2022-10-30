@@ -15,6 +15,12 @@
       </van-sticky>
       <van-cell-group  v-for="(master,index) in hairMaster" inset :title="master.hairMasterName" :key="index" >
         <van-card >
+          <template #footer>
+            <van-cell>
+              <van-button type="primary" size="small"  @click="editHairMaster(master)" v-show="isEditBillButtonShow">更改信息</van-button>
+              <van-button type="primary" size="small" @click="jumpToBill(master)">查看账目</van-button>
+            </van-cell>
+          </template>
           <template #tags>
             <van-cell title="发型师ID" :value="master.hairMasterId"/>
             <van-cell title="登录名" :value="master.hairMasterCode"/>
@@ -22,10 +28,6 @@
             <van-cell title="状态" :value="master.status===0?'禁用':'启用'"/>
             <van-cell title="创建时间" :value="master.createTime"/>
             <van-cell title="更新时间" :value="master.updateTime"/>
-            <van-cell>
-              <van-button type="primary" size="small"  @click="editHairMaster(master)" v-show="isEditBillButtonShow">更改信息</van-button>
-              <van-button type="primary" size="small" @click="jumpToBill(master)">查看账目</van-button>
-            </van-cell>
           </template>
         </van-card>
       </van-cell-group>

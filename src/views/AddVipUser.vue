@@ -6,7 +6,6 @@
           name="会员姓名"
           label="会员姓名"
           placeholder="会员姓名"
-          :rules="[{ required: true, message: '请填写会员姓名' }]"
       />
       <van-field name="radio" label="性别">
         <template #input>
@@ -21,8 +20,6 @@
           name="联系电话"
           label="联系电话"
           placeholder="联系电话"
-          :rules="[{ required: true, message: '请填写会员联系电话' },
-          {pattern:/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/,message: '请输入正确的电话号码'}]"
       />
       <van-field
            v-model="userModel.accountAmount"
