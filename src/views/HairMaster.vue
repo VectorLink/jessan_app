@@ -13,7 +13,7 @@
       <van-sticky container="listContainer">
         <van-button type="primary" @click="addHairMasterVisible=true" v-show="isEditBillButtonShow">添加发型师</van-button>
       </van-sticky>
-      <van-cell-group  v-for="master in hairMaster" inset :title="master.hairMasterName"  >
+      <van-cell-group  v-for="(master,index) in hairMaster" inset :title="master.hairMasterName" :key="index" >
         <van-card >
           <template #tags>
             <van-cell title="发型师ID" :value="master.hairMasterId"/>
@@ -25,7 +25,6 @@
             <van-cell>
               <van-button type="primary" size="small"  @click="editHairMaster(master)" v-show="isEditBillButtonShow">更改信息</van-button>
               <van-button type="primary" size="small" @click="jumpToBill(master)">查看账目</van-button>
-              <van-button type="primary" size="small" @click="editHairMaster(master)" v-show="isEditBillButtonShow">修改账目</van-button>
             </van-cell>
           </template>
         </van-card>

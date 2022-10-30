@@ -2,13 +2,6 @@
   <div>
     <van-form @submit="addVipUser">
       <van-field
-          v-model="userModel.userId"
-          name="会员编号"
-          label="会员编号"
-          placeholder="会员编号"
-          readonly
-      />
-      <van-field
           v-model="userModel.userName"
           name="会员姓名"
           label="会员姓名"
@@ -30,6 +23,13 @@
           placeholder="联系电话"
           :rules="[{ required: true, message: '请填写会员联系电话' },
           {pattern:/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/,message: '请输入正确的电话号码'}]"
+      />
+      <van-field
+           v-model="userModel.accountAmount"
+           name="充值金额"
+           label="充值金额"
+           placeholder="充值金额"
+           :rules="[{ pattern, message: '请输入正确内容' }]"
       />
       <van-field
           readonly
@@ -69,11 +69,11 @@ export default {
   data() {
     return {
       userModel: {
-        userId: null,
         userName: null,
         sex: null,
         telephone: null,
-        hairMasterId: null
+        hairMasterId: null,
+        accountAmount:null
       },
       hairMasters: [],
       hairMaster:{
@@ -95,33 +95,26 @@ export default {
   },
   methods: {
     addVipUser() {
-      this.userModel.hairMasterId=this.hairMaster.hairMasterId
+      this.userModel.hairMasterId = this.hairMaster.hairMasterId
       this.$axios.post("/vipUser/addUser", this.userModel).then(res => {
         if (res.data.code === 0) {
           this.$toast.success("会员添加成功")
-          //重新获取一下数据到entity
-          this.vipUserQueryParam.searchParam=this.userModel.telephone
-          this.$axios.post("/vipUser/listUser", this.vipUserQueryParam).then(res2 => {
-            if (res2.data.code===0){
-              this.userModel.userId=res2.data.data.data[0].vipUserId
+          this.vipUserQueryParam.searchParam = this.userModel.telephone
+          this.$router.push({
+            name: "vipUser",
+            params: {
+              userName: this.userModel.userName
             }
-            this.vipUserQueryParam.searchParam=null
-            this.$router.push({
-              name:"vipUser",
-              params:{
-                userName:this.userModel.userName
-              }
-            })
-            setTimeout(()=>{
-              this.userModel.userId=null;
-              this.userModel.userName=null;
-              this.userModel.hairMasterId=null;
-              this.userModel.telephone=null;
-              this.userModel.sex=null;
-              this.hairMaster.hairMasterId=null;
-              this.hairMaster.hairMasterName=null;
-            },10000)
           })
+          setTimeout(() => {
+            this.userModel.userName = null;
+            this.userModel.hairMasterId = null;
+            this.userModel.telephone = null;
+            this.userModel.sex = null;
+            this.hairMaster.hairMasterId = null;
+            this.hairMaster.hairMasterName = null;
+          }, 10000)
+
         }
       })
     },

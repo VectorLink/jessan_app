@@ -12,6 +12,12 @@ const routes = [
     component: Login
   },
   {
+    // 登录
+    path: '/login',
+    name: 'login',
+    component: Login
+  },
+  {
     // 会员管理
     path: '/vipUser',
     name: 'vipUser',

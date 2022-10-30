@@ -12,7 +12,7 @@
         </van-cell-group>
         </div>
       </van-sticky>
-    <van-cell v-for="master in hairMasterStatistic ">
+    <van-cell v-for="(master,index) in hairMasterStatistic" :key="index">
       <van-card :title="master.hairMasterName">
         <template #tags>
          <van-cell-group title="会员信息">

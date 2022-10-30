@@ -4,7 +4,7 @@
       <van-search
           v-model="vipUserQueryParam.searchParam"
           show-action
-          placeholder="请输入会员名称或者电话号码"
+          placeholder="请输入会员名称、编号或者电话号码"
           @search="searchUser"
           @cancel="cancelSearch"
       />
@@ -16,7 +16,7 @@
         @load="onLoad"
         offset="200"
     >
-      <van-cell-group  v-for="user in userList" inset :title="user.vipUserName"  >
+      <van-cell-group  v-for="(user,index) in userList" inset :title="`${user.vipUserName}【${user.vipUserId}】`" :key="index" >
         <van-card>
           <template #tags>
             <van-cell title="性别" :value="user.sex==0?'男':'女'"/>
@@ -27,7 +27,7 @@
             <van-cell>
               <van-button size="small" @click="editVipUser(user)" >修改会员</van-button>
               <van-button size="small" @click="chargeAccount(user)">会员充值</van-button>
-              <van-button size="small" @click="consumerAccount(user)">美容消费</van-button>
+              <van-button size="small" @click="consumerAccount(user)">美发消费</van-button>
               <van-button size="small" @click="jumpHistory(user)">消费历史</van-button>
             </van-cell>
           </template>
@@ -35,7 +35,7 @@
       </van-cell-group>
     </van-list>
 <!--    充值或者消费窗口-->
-    <van-popup v-model="chargeVisible" class="van-popup">
+    <van-popup v-model="chargeVisible" class="van-popup" >
       <van-form>
         <van-field
             v-model="showAccountModel.userName"
@@ -56,6 +56,7 @@
             name="账户余额"
             label="账户余额"
             placeholder="账户余额"
+            readonly
         />
         <van-field
             v-model="chargeAccountParam.alterAmount"
@@ -64,7 +65,7 @@
             :placeholder="this.operationContent"
             :rules="[{ pattern, message: '请输入大于0的整数' }]"
         />
-        <van-button round  type="primary" @click="isSignVisible=true">签名</van-button>
+        <van-button hairline v-show="operationContent==='消费金额'"  block type="primary" @click="isSignVisible=true">签名</van-button>
         <div style="margin: 16px;">
           <van-button round block type="info" @click="submitMethod">{{operationContent}}</van-button>
         </div>
@@ -72,9 +73,9 @@
     </van-popup>
 <!--    签名-->
     <van-popup v-model="isSignVisible">
-      <vue-esign ref="esign" :width="800" :height="300" :isCrop="isCrop" :lineWidth="lineWidth" :lineColor="lineColor" :bgColor.sync="bgColor" />
-      <button @click="handleReset">重签</button>
-      <button @click="handleGenerate">完成</button>
+      <vue-esign ref="esign" :width="500" :height="500" :isCrop="isCrop" :lineWidth="lineWidth" :lineColor="lineColor" :bgColor.sync="bgColor" @close="resultImg=''" />
+      <van-button @click="handleReset">重签</van-button>
+      <van-button @click="handleGenerate">完成</van-button>
     </van-popup>
 <!--    编辑会员信息-->
     <van-popup v-model="editUserVisible">
@@ -190,16 +191,17 @@ export default {
         userId: 0
       },
       userModel: {
-        userId: null,
+        userId:null,
+        userCode: null,
         userName: null,
         sex: null,
         telephone: null,
         hairMasterId: null
       },
       lineWidth: 6,
-      lineColor: '#000000',
-      bgColor: '#ffffff',
-      resultImg: '',
+      lineColor: 'black',
+      bgColor: 'white',
+      resultImg: null,
       isCrop: false
     }
   },
@@ -241,12 +243,9 @@ export default {
     handleGenerate () {
       this.$refs.esign.generate().then(res => {
         this.resultImg=this.dataURLtoFile(res);
-        console.log(res)
         this.isSignVisible=false;
-      }).catch(err => {
-
-        alert(err) // 画布没有签字时会执行这里 'Not Signned'
-
+      }).catch(() => {
+        alert("请先签名！")
       })
     },
     // 将base64转换为file
@@ -259,7 +258,7 @@ export default {
       while (n--) {
         ia[n] = bytes.charCodeAt(n);
       }
-      return new File([ia], "easign.jpg", { type: mime });
+      return new File([ia], "easign.png", { type: mime });
     },
     onConfirm(value) {
       this.hairMaster = value;
@@ -283,12 +282,12 @@ export default {
       }
     },
     chargeAccountPost() {
+      if (this.chargeAccountParam.alterAmount<=0||this.chargeAccountParam.alterAmount===undefined){
+        this.$toast.fail("请输入大于0的金额")
+        return
+      }
       this.chargeAccountParam.consumerType = 1
-      let formData = new FormData();
-      formData.append("consumerType",this.chargeAccountParam.consumerType)
-      formData.append('alterAmount',this.chargeAccountParam.alterAmount)
-      formData.append('userId',this.chargeAccountParam.userId)
-      this.$axios.post('/vipUser/changeAccount',formData).then(res => {
+      this.$axios.post('/vipUser/chargeAccount',this.chargeAccountParam).then(res => {
         if (res.data.code === 0) {
           this.$toast.success(res.data.data);
           this.chargeVisible = false;
@@ -339,6 +338,14 @@ export default {
     },
     consumerAccountPost() {
       this.chargeAccountParam.consumerType = 0
+      if (this.chargeAccountParam.alterAmount<=0||this.chargeAccountParam.alterAmount===undefined){
+        this.$toast.fail("请输入大于0的金额")
+        return
+      }
+      if (this.resultImg==null||this.resultImg.length===0){
+        this.$toast.fail("请先签名")
+        return
+      }
       let formData = new FormData();
       formData.append('sign',this.resultImg)
       formData.append("consumerType",this.chargeAccountParam.consumerType)
@@ -346,7 +353,7 @@ export default {
       formData.append('userId',this.chargeAccountParam.userId)
       console.log(formData)
       this.$axios({
-        url:'/vipUser/changeAccount',
+        url:'/vipUser/consumerAccount',
         method:'POST',
          data:formData
       }).then(res => {
@@ -359,6 +366,7 @@ export default {
           this.showAccountModel = {}
           this.chargeAccountParam = {}
           this.operationContent=''
+          this.$refs.esign.reset()
         }else {
           this.$toast.fail(res.data.msg)
         }
@@ -366,7 +374,7 @@ export default {
     },
     editVipUser(val) {
       this.userModel.userName = val.vipUserName
-      this.userModel.userId = val.vipUserId
+      this.userModel.userId=val.vipUserId
       this.userModel.sex = val.sex
       this.userModel.telephone = val.telephone
       this.userModel.hairMasterId = val.hairMasterId

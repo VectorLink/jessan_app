@@ -12,8 +12,8 @@
         @load="hairMasterBillHistory"
         offset="200"
     >
-      <van-row v-for="history in historyModel" >
-        <van-card slot-scope="scope" thumb="">
+      <van-row v-for="(history,index) in historyModel" :key="index">
+        <van-card >
           <template #tags>
             <van-cell title="会员名称" :value="history.vipUserName"/>
             <van-cell title="消费金额" :value="history.consumerAmount"/>
@@ -21,10 +21,26 @@
             <van-cell title="消费类型" :value="history.consumerType"/>
             <van-cell title="消费时间" :value="history.consumerTime"/>
             <van-cell title="发型师" :value="history.hairMasterName"/>
+            <van-button block type="primary" v-show="$store.getters.GET_USER.type === 0&&history.vipUserId===0" @click="showChange(history.id)">修改账目</van-button>
           </template>
         </van-card>
       </van-row>
     </van-list>
+    <van-popup v-model="isEditBillButtonShow">
+      <van-form @submit="changeBillAmount">
+        <van-field
+            v-model="changeConsumerBillParam.changeAmount"
+            :name="this.operationContent"
+            :label="this.operationContent"
+            :placeholder="this.operationContent"
+            :rules="[{ pattern, message: '请输入大于0的整数' }]"
+            input-align="left"
+        />
+        <div style="margin: 16px;">
+          <van-button round block type="info" native-type="submit" >确认修改</van-button>
+        </div>
+      </van-form>
+    </van-popup>
     <BottomMenu></BottomMenu>
   </div>
 </template>
@@ -62,7 +78,15 @@ export default {
         value:0,
         text:''
       },
-      hairMasters:[]
+      hairMasters:[],
+      changeConsumerAmount:0,
+      pattern: /^[0-9]*[1-9][0-9]*$/,
+      operationContent:'修改消费金额',
+      isEditBillButtonShow:false,
+      changeConsumerBillParam:{
+        consumerId:0,
+        changeAmount:0.0
+      }
     }
   },
   methods:{
@@ -70,7 +94,6 @@ export default {
       this.userConsumerParam.userId = this.hairMaster.value
       setTimeout(() => {
         this.$axios.post("/vipUser/listMasterBill", this.userConsumerParam).then(res => {
-          console.log(JSON.stringify(res))
           const _this = this;
           if (res.data.code === 0) {
             if (res.data.data.data.length > 0) {
@@ -100,7 +123,24 @@ export default {
       this.userConsumerParam.userId=this.hairMaster.value
       this.userConsumerParam.page.current=1
       this.hairMasterBillHistory()
+    },
+    showChange(val){
+      this.isEditBillButtonShow=true
+      this.changeConsumerBillParam.consumerId=val
+    },
+    changeBillAmount(){
+      this.$axios.post("/vipUser/changeBillAmount",this.changeConsumerBillParam).then(res=>{
+        if (res.data.code===0){
+          this.changeConsumerBillParam={}
+          this.$toast.success("修改账目成功")
+          this.isEditBillButtonShow=false
+          this.historyModel=[]
+          this.userConsumerParam.page.current=1
+          this.hairMasterBillHistory();
+        }
+      })
     }
+
   },
   created() {
     this.$axios.post("/getHairMaster", "{}").then(res => {
@@ -123,7 +163,6 @@ export default {
     if (this.$route.params.hairMasterName !=null) {
       this.hairMaster.text = this.$route.params.hairMasterName
     }
-    console.log(JSON.stringify( this.hairMaster))
   }
 }
 </script>

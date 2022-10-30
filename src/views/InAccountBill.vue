@@ -43,10 +43,8 @@ export default {
       this.showPicker = false;
     },
     consumerAccountPost() {
-      console.log(JSON.stringify(this.chargeAccountParam))
       this.chargeAccountParam.consumerType = 0
       this.$axios.post("/vipUser/addBill", this.chargeAccountParam).then(res => {
-        console.log(JSON.stringify(res))
         if (res.data.code === 0) {
           this.$toast.success(res.data.data)
           this.chargeAccountParam.alterAmount=0.00

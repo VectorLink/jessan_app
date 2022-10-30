@@ -6,11 +6,15 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     token:localStorage.getItem("token"),
-    userInfo:JSON.parse(sessionStorage.getItem("userInfo"))
+    userInfo:JSON.parse(sessionStorage.getItem("userInfo")),
+    historyUserInfo:JSON.parse(sessionStorage.getItem("historyUserInfo"))
   },
   getters: {
     GET_USER: state => {
       return state.userInfo
+    },
+    GET_HISTORY_USER: (state)=>{
+      return state.historyUserInfo
     }
   },
   mutations: {
@@ -27,6 +31,10 @@ export default new Vuex.Store({
       state.userInfo={}
       localStorage.setItem("token",'')
       sessionStorage.setItem("userInfo",JSON.stringify(""))
+    },
+    SET_HISTORY_USER_INFO:(state,user)=>{
+      state.historyUserInfo=user
+      sessionStorage.setItem("historyUserInfo",JSON.stringify(user))
     }
   },
   actions: {

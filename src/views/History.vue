@@ -1,8 +1,8 @@
 <template>
   <div >
     <van-sticky>
-      <van-cell title="会员姓名" v-model="userConsumerName"></van-cell>
-      <van-cell title="手机号码" v-model="userConsumerTelephone"></van-cell>
+      <van-cell title="会员姓名" v-model="historyUserInfo.userConsumerName"></van-cell>
+      <van-cell title="手机号码" v-model="historyUserInfo.userConsumerTelephone"></van-cell>
     </van-sticky>
     <van-list
         v-model="loading"
@@ -11,7 +11,7 @@
         @load="checkHistory"
         offset="200"
     >
-      <van-row v-for="history in historyModel" >
+      <van-row v-for="(history,index) in historyModel" :key="index" >
         <van-card slot-scope="scope">
           <template #tags>
             <van-cell title="消费时间" :value="history.consumerTime"/>
@@ -19,17 +19,18 @@
             <van-cell title="消费金额" :value="history.consumerAmount"/>
             <van-cell title="账户余额" :value="history.afterAccountAmount"/>
             <van-cell title="操作人" :value="history.hairMasterName"/>
-            <van-button v-show="history.consumerType!=='客户充值'" plain block type="primary" @click="checkSignImg(history.id)">查看签名</van-button>
+            <van-button v-show="history.consumerType!=='客户充值'" hairline plain block type="primary" @click="checkSignImg(history.id)">查看签名</van-button>
           </template>
         </van-card>
       </van-row>
     </van-list>
-    <van-popup v-model="isImgShow">
+    <van-popup v-model="isImgShow" >
       <van-image
-          width="100%"
-          height="100%"
+          width="50%"
+          height="50%"
           lazy-load
           :src=this.img
+          alt="66"
       />
     </van-popup>
     <BottomMenu></BottomMenu>
@@ -54,8 +55,7 @@ export default {
           pages: 0
         }
       },
-      userConsumerName:null,
-      userConsumerTelephone:null,
+
       showAccountModel: {
         userId: null,
         userName: null,
@@ -65,7 +65,12 @@ export default {
         hairMaster: null
       },
       img: null,
-      isImgShow:false
+      isImgShow:false,
+      historyUserInfo:{
+        userId:'',
+        userConsumerName:null,
+        userConsumerTelephone:null,
+      }
     }
   },
   methods:{
@@ -100,9 +105,16 @@ export default {
     }
   },
   created() {
-    this.userConsumerParam.userId = this.$route.params.vipUserId
-    this.userConsumerName = this.$route.params.vipUserName
-    this.userConsumerTelephone = this.$route.params.telephone
+    if (Object.keys(this.$route.params).length!==0) {
+      this.userConsumerParam.userId = this.$route.params.vipUserId
+      this.historyUserInfo.userId = this.$route.params.vipUserId
+      this.historyUserInfo.userConsumerName = this.$route.params.vipUserName
+      this.historyUserInfo.userConsumerTelephone = this.$route.params.telephone
+      this.$store.commit('SET_HISTORY_USER_INFO', this.historyUserInfo)
+    }else {
+      this.historyUserInfo=this.$store.getters.GET_HISTORY_USER
+      this.userConsumerParam.userId=this.historyUserInfo.userId
+    }
   }
 }
 </script>
