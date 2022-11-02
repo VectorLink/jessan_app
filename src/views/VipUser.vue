@@ -164,7 +164,7 @@ export default {
         page: {
           current: 1,
           total: 1,
-          size: 3,
+          size: 5,
           pages: 0
         }
       },
@@ -213,25 +213,28 @@ export default {
           if (res.status!==200){
             this.finished = true;
           }
-          if (res.data.data.data.length===0){
-            this.finished = true;
+          if (res.data.data.data.length!==0){
+            res.data.data.data.forEach(
+                function (val) {
+                  _this.userList.push(val)
+                }
+            )
           }
-          res.data.data.data.forEach(
-              function (val) {
-                _this.userList.push(val)
-              }
-          )
-          this.vipUserQueryParam.page = res.data.data.page
-          this.vipUserQueryParam.page.current+=1;
+          if (res.data.data.data.length<this.vipUserQueryParam.page.size){
+            this.finished = true;
+          }else {
+            this.vipUserQueryParam.page = res.data.data.page
+            this.vipUserQueryParam.page.current += 1;
+            // 加载状态结束
+          }
+          this.loading = false;
         },error=>{
           this.loading=false
           this.finished=true
           this.$toast.fail(error)
         })
-        // 加载状态结束
-        this.loading = false;
         // 数据全部加载完成(最多加载40条数据)
-        if (this.userList.length>=40) {
+        if (_this.userList.length>=this.vipUserQueryParam.page.total) {
           this.finished = true;
         }
       }, 500);
@@ -306,15 +309,16 @@ export default {
       this.vipUserQueryParam.searchParam=''
       this.userList=[]
       this.vipUserQueryParam.page.current=1
+      this.finished=false
+      this.loading=true
       this.onLoad()
     },
     searchUser() {
       this.vipUserQueryParam.page.current = 1
       this.userList=[]
-      this.$axios.post("/vipUser/listUser", this.vipUserQueryParam).then(res => {
-        this.userList = res.data.data.data
-        this.vipUserQueryParam.page = res.data.data.page
-      })
+      this.finished=false
+      this.loading=true
+      this.onLoad();
     },
     jumpHistory(val) {
       this.$router.push({
